@@ -103,27 +103,14 @@ class ThumbPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawShadow(
-      Path()
-        ..addOval(
-          Rect.fromCircle(
-            center: const Offset(0.5, 2.0),
-            radius: size.width * 1.1,
-          ),
-        ),
-      Colors.grey,
-      5.0,
-      true,
+    canvas.drawCircle(
+      Offset(0.0, size.height * 0.4),
+      size.height,
+      Paint()
+        ..strokeWidth = 3
+        ..color = Colors.black12
+        ..style = PaintingStyle.stroke,
     );
-
-    // canvas.drawCircle(
-    //   Offset(0.0, size.height * 0.4),
-    //   size.height,
-    //   Paint()
-    //     ..strokeWidth = 3
-    //     ..color = Colors.white
-    //     ..style = PaintingStyle.stroke,
-    // );
 
     canvas.drawCircle(
       Offset(0.0, size.height * 0.4),
@@ -267,7 +254,7 @@ class ColorPickerSlider extends StatelessWidget {
               left: thumbOffset,
               top: 2,
               child: const CustomPaint(
-                size: Size(15, 15),
+                size: Size(8, 8),
                 painter: ThumbPainter(),
               ),
             ),
