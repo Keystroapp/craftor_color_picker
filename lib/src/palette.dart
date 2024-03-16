@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 /// The components of HSV Color Picker
 ///
 /// Try to create a Color Picker with other layout on your own :)
@@ -98,10 +99,7 @@ class TrackPainter extends CustomPainter {
 
 /// Painter for thumb of slider.
 class ThumbPainter extends CustomPainter {
-  const ThumbPainter({this.thumbColor, this.fullThumbColor = false});
-
-  final Color? thumbColor;
-  final bool fullThumbColor;
+  const ThumbPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -117,6 +115,7 @@ class ThumbPainter extends CustomPainter {
       5.0,
       true,
     );
+
     // canvas.drawCircle(
     //   Offset(0.0, size.height * 0.4),
     //   size.height,
@@ -126,15 +125,13 @@ class ThumbPainter extends CustomPainter {
     //     ..style = PaintingStyle.stroke,
     // );
 
-    if (thumbColor != null) {
-      canvas.drawCircle(
-        Offset(0.0, size.height * 0.4),
-        size.height * 1.0,
-        Paint()
-          ..color = thumbColor!
-          ..style = PaintingStyle.fill,
-      );
-    }
+    canvas.drawCircle(
+      Offset(0.0, size.height * 0.4),
+      size.height * 1.0,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill,
+    );
   }
 
   @override
@@ -198,20 +195,18 @@ class CheckerPainter extends CustomPainter {
 
 /// 9 track types for slider picker widget.
 class ColorPickerSlider extends StatelessWidget {
-  const ColorPickerSlider(
-    this.trackType,
-    this.hsvColor,
-    this.onColorChanged, {
-    super.key,
-    required this.size,
-    this.fullThumbColor = false,
-  });
-
   final TrackType trackType;
   final HSVColor hsvColor;
   final Size size;
   final ValueChanged<HSVColor> onColorChanged;
-  final bool fullThumbColor;
+
+  const ColorPickerSlider({
+    super.key,
+    required this.trackType,
+    required this.hsvColor,
+    required this.size,
+    required this.onColorChanged,
+  });
 
   void slideEvent(Offset pos) {
     double localDx = pos.dx - 15.0;
@@ -238,7 +233,7 @@ class ColorPickerSlider extends StatelessWidget {
 
     switch (trackType) {
       case TrackType.hue:
-        thumbOffset += (size.width - 30.0) * hsvColor.hue / 360;
+        thumbOffset += (size.width - 30.0) * hsvColor.hue / 359;
         break;
       case TrackType.alpha:
         thumbOffset += (size.width - 30.0) * hsvColor.toColor().opacity;
@@ -271,12 +266,9 @@ class ColorPickerSlider extends StatelessWidget {
             Positioned(
               left: thumbOffset,
               top: 2,
-              child: CustomPaint(
-                size: const Size(8, 8),
-                painter: ThumbPainter(
-                  thumbColor: Colors.white,
-                  fullThumbColor: fullThumbColor,
-                ),
+              child: const CustomPaint(
+                size: Size(15, 15),
+                painter: ThumbPainter(),
               ),
             ),
           ],
