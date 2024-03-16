@@ -4,11 +4,11 @@ import 'palette.dart';
 
 class ColorPicker extends StatefulWidget {
   const ColorPicker({
-    Key? key,
+    super.key,
     required this.pickerColor,
     required this.pickerAreaSize,
     required this.onColorChanged,
-  }) : super(key: key);
+  });
 
   final Color pickerColor;
   final Size pickerAreaSize;
@@ -30,7 +30,9 @@ class _ColorPickerState extends State<ColorPicker> {
   @override
   void didUpdateWidget(ColorPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    currentHsvColor = HSVColor.fromColor(widget.pickerColor);
+    if (oldWidget.pickerColor != widget.pickerColor) {
+      currentHsvColor = HSVColor.fromColor(widget.pickerColor);
+    }
   }
 
   @override
@@ -46,6 +48,7 @@ class _ColorPickerState extends State<ColorPicker> {
         setState(() => currentHsvColor = color);
         widget.onColorChanged(currentHsvColor.toColor());
       },
+      size: widget.pickerAreaSize,
     );
   }
 
@@ -76,11 +79,10 @@ class _ColorPickerState extends State<ColorPicker> {
           width: widget.pickerAreaSize.width,
           child: Column(
             children: <Widget>[
-              SizedBox(height: 40.0, child: colorPickerSlider(TrackType.hue)),
-              SizedBox(
-                height: 40.0,
-                child: colorPickerSlider(TrackType.alpha),
-              ),
+              const SizedBox(height: 20),
+              colorPickerSlider(TrackType.hue),
+              const SizedBox(height: 20),
+              colorPickerSlider(TrackType.alpha),
             ],
           ),
         ),

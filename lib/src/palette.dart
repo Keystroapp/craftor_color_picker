@@ -5,59 +5,10 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'utils.dart';
-
 /// Track types for slider picker.
 enum TrackType {
   hue,
   alpha,
-}
-
-/// Painter for SV mixture.
-class ColorAreaPainter extends CustomPainter {
-  const ColorAreaPainter(this.hsvColor, {this.pointerColor});
-
-  final HSVColor hsvColor;
-  final Color? pointerColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    const Gradient gradientV = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Colors.white, Colors.black],
-    );
-    final Gradient gradientH = LinearGradient(
-      colors: [
-        Colors.white,
-        HSVColor.fromAHSV(1.0, hsvColor.hue, 1.0, 1.0).toColor(),
-      ],
-    );
-    canvas.drawRect(rect, Paint()..shader = gradientV.createShader(rect));
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..blendMode = BlendMode.multiply
-        ..shader = gradientH.createShader(rect),
-    );
-
-    canvas.drawCircle(
-      Offset(
-          size.width * hsvColor.saturation, size.height * (1 - hsvColor.value)),
-      size.height * 0.04,
-      Paint()
-        ..color = pointerColor ??
-            (useWhiteForeground(hsvColor.toColor())
-                ? Colors.white
-                : Colors.black)
-        ..strokeWidth = 1.5
-        ..style = PaintingStyle.stroke,
-    );
-  }
-
-  @override
-  bool shouldRepaint(ColorAreaPainter oldDelegate) => false;
 }
 
 class _SliderLayout extends MultiChildLayoutDelegate {
@@ -158,25 +109,31 @@ class ThumbPainter extends CustomPainter {
       Path()
         ..addOval(
           Rect.fromCircle(
-              center: const Offset(0.5, 2.0), radius: size.width * 1.8),
+            center: const Offset(0.5, 2.0),
+            radius: size.width * 1.1,
+          ),
         ),
-      Colors.black,
-      3.0,
+      Colors.grey,
+      5.0,
       true,
     );
-    canvas.drawCircle(
-        Offset(0.0, size.height * 0.4),
-        size.height,
-        Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.fill);
+    // canvas.drawCircle(
+    //   Offset(0.0, size.height * 0.4),
+    //   size.height,
+    //   Paint()
+    //     ..strokeWidth = 3
+    //     ..color = Colors.white
+    //     ..style = PaintingStyle.stroke,
+    // );
+
     if (thumbColor != null) {
       canvas.drawCircle(
-          Offset(0.0, size.height * 0.4),
-          size.height * (fullThumbColor ? 1.0 : 0.65),
-          Paint()
-            ..color = thumbColor!
-            ..style = PaintingStyle.fill);
+        Offset(0.0, size.height * 0.4),
+        size.height * 1.0,
+        Paint()
+          ..color = thumbColor!
+          ..style = PaintingStyle.fill,
+      );
     }
   }
 
@@ -246,18 +203,21 @@ class ColorPickerSlider extends StatelessWidget {
     this.hsvColor,
     this.onColorChanged, {
     super.key,
+    required this.size,
     this.fullThumbColor = false,
   });
 
   final TrackType trackType;
   final HSVColor hsvColor;
+  final Size size;
   final ValueChanged<HSVColor> onColorChanged;
   final bool fullThumbColor;
 
-  void slideEvent(RenderBox getBox, BoxConstraints box, Offset globalPosition) {
-    double localDx = getBox.globalToLocal(globalPosition).dx - 15.0;
-    double progress =
-        localDx.clamp(0.0, box.maxWidth - 30.0) / (box.maxWidth - 30.0);
+  void slideEvent(Offset pos) {
+    double localDx = pos.dx - 15.0;
+    double width = size.width;
+    // double height = size.height;
+    double progress = localDx.clamp(0.0, width - 30.0) / (width - 30.0);
     switch (trackType) {
       case TrackType.hue:
         // 360 is the same as zero
@@ -266,73 +226,63 @@ class ColorPickerSlider extends StatelessWidget {
         break;
 
       case TrackType.alpha:
-        onColorChanged(hsvColor.withAlpha(
-            localDx.clamp(0.0, box.maxWidth - 30.0) / (box.maxWidth - 30.0)));
+        onColorChanged(hsvColor
+            .withAlpha(localDx.clamp(0.0, width - 30.0) / (width - 30.0)));
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints box) {
-      double thumbOffset = 15.0;
-      Color thumbColor;
-      switch (trackType) {
-        case TrackType.hue:
-          thumbOffset += (box.maxWidth - 30.0) * hsvColor.hue / 360;
-          thumbColor = HSVColor.fromAHSV(1.0, hsvColor.hue, 1.0, 1.0).toColor();
-          break;
-        case TrackType.alpha:
-          thumbOffset += (box.maxWidth - 30.0) * hsvColor.toColor().opacity;
-          thumbColor = hsvColor.toColor().withOpacity(hsvColor.alpha);
-          break;
-      }
+    double thumbOffset = 15.0;
 
-      return CustomMultiChildLayout(
-        delegate: _SliderLayout(),
-        children: <Widget>[
-          LayoutId(
-            id: _SliderLayout.track,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(50.0)),
-              child: CustomPaint(
+    switch (trackType) {
+      case TrackType.hue:
+        thumbOffset += (size.width - 30.0) * hsvColor.hue / 360;
+        break;
+      case TrackType.alpha:
+        thumbOffset += (size.width - 30.0) * hsvColor.toColor().opacity;
+        break;
+    }
+    return GestureDetector(
+      onTapDown: (details) => slideEvent(details.localPosition),
+      onPanStart: (details) {
+        slideEvent(details.localPosition);
+      },
+      onPanUpdate: (details) => slideEvent(details.localPosition),
+      child: Container(
+        color: Colors.transparent,
+        width: size.width,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(50.0)),
+                child: CustomPaint(
+                  size: Size(size.width, 10),
                   painter: TrackPainter(
-                trackType,
-                hsvColor,
-              )),
+                    trackType,
+                    hsvColor,
+                  ),
+                ),
+              ),
             ),
-          ),
-          LayoutId(
-            id: _SliderLayout.thumb,
-            child: Transform.translate(
-              offset: Offset(thumbOffset, 0.0),
+            Positioned(
+              left: thumbOffset,
+              top: 2,
               child: CustomPaint(
+                size: const Size(8, 8),
                 painter: ThumbPainter(
-                  thumbColor: thumbColor,
+                  thumbColor: Colors.white,
                   fullThumbColor: fullThumbColor,
                 ),
               ),
             ),
-          ),
-          LayoutId(
-            id: _SliderLayout.gestureContainer,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints box) {
-                RenderBox? getBox = context.findRenderObject() as RenderBox?;
-                return GestureDetector(
-                  onPanDown: (DragDownDetails details) => getBox != null
-                      ? slideEvent(getBox, box, details.globalPosition)
-                      : null,
-                  onPanUpdate: (DragUpdateDetails details) => getBox != null
-                      ? slideEvent(getBox, box, details.globalPosition)
-                      : null,
-                );
-              },
-            ),
-          ),
-        ],
-      );
-    });
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -357,7 +307,7 @@ class ColorPickerArea extends StatelessWidget {
     final height = size.height;
     double horizontal = position.dx.clamp(0.0, width);
     double vertical = position.dy.clamp(0.0, height);
-    print(1 - (vertical / height));
+
     _handleColorRectChange(horizontal / width, 1 - (vertical / height));
   }
 
@@ -376,4 +326,51 @@ class ColorPickerArea extends StatelessWidget {
       ),
     );
   }
+}
+
+// Painter for SV mixture.
+class ColorAreaPainter extends CustomPainter {
+  const ColorAreaPainter(this.hsvColor, {this.pointerColor});
+
+  final HSVColor hsvColor;
+  final Color? pointerColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect rect = Offset.zero & size;
+    const Gradient gradientV = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Colors.white, Colors.black],
+    );
+    final Gradient gradientH = LinearGradient(
+      colors: [
+        Colors.white,
+        HSVColor.fromAHSV(1.0, hsvColor.hue, 1.0, 1.0).toColor(),
+      ],
+    );
+    canvas.drawRect(rect, Paint()..shader = gradientV.createShader(rect));
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..blendMode = BlendMode.multiply
+        ..shader = gradientH.createShader(rect),
+    );
+
+// paint the ring
+    canvas.drawCircle(
+      Offset(
+        size.width * hsvColor.saturation,
+        size.height * (1 - hsvColor.value),
+      ),
+      size.height * 0.04,
+      Paint()
+        ..color = pointerColor ?? (Colors.white)
+        ..strokeWidth = 3
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(ColorAreaPainter oldDelegate) => true;
 }
