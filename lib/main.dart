@@ -44,36 +44,34 @@ class _MyAppState extends State<MyApp> {
           //   ),
           // ),
           Expanded(
-            child: LayoutBuilder(builder: (context, constraints) {
-              return Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 360,
-                    child: ColorWheelPicker(
-                      color: color,
-                      // shouldUpdate: true,
-                      onChanged: (c) {
-                        setState(() {
-                          color = c;
-                        });
-                      },
-                    ),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 360,
+                  child: ColorWheelPicker(
+                    color: color,
+                    // shouldUpdate: true,
+                    onChanged: (c) {
+                      setState(() {
+                        color = c;
+                      });
+                    },
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SelectableText('$color'),
-                  SelectableText('${colorToHex(color)}'),
-                  SelectableText('${colorToHex(color, alphaFirst: true)}'),
-                  TextField(onChanged: (c) {
-                    setState(() {
-                      color = colorFromHex(c) ?? Colors.black;
-                    });
-                  })
-                ],
-              );
-            }),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                SelectableText('$color'),
+                SelectableText('${colorToHex(color)}'),
+                SelectableText('${colorToHex(color, alphaFirst: true)}'),
+                TextField(onChanged: (c) {
+                  setState(() {
+                    color = colorFromHex(c) ?? Colors.black;
+                  });
+                })
+              ],
+            ),
           ),
         ],
       ),
