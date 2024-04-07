@@ -265,47 +265,47 @@ class ColorPickerSlider extends StatelessWidget {
   }
 }
 
-class ColorPickerArea extends StatelessWidget {
-  const ColorPickerArea(
-    this.hsvColor,
-    this.size,
-    this.onColorChanged, {
-    super.key,
-  });
+// class ColorPickerArea extends StatelessWidget {
+//   const ColorPickerArea(
+//     this.hsvColor,
+//     this.size,
+//     this.onColorChanged, {
+//     super.key,
+//   });
 
-  final HSVColor hsvColor;
-  final Size size;
-  final ValueChanged<HSVColor> onColorChanged;
+//   final HSVColor hsvColor;
+//   final Size size;
+//   final ValueChanged<HSVColor> onColorChanged;
 
-  void _handleColorRectChange(double horizontal, double vertical) {
-    onColorChanged(hsvColor.withSaturation(horizontal).withValue(vertical));
-  }
+//   void _handleColorRectChange(double horizontal, double vertical) {
+//     onColorChanged(hsvColor.withSaturation(horizontal).withValue(vertical));
+//   }
 
-  void _handleGesture(Offset position) {
-    final width = size.width;
-    final height = size.height;
-    double horizontal = position.dx.clamp(0.0, width);
-    double vertical = position.dy.clamp(0.0, height);
+//   void _handleGesture(Offset position) {
+//     final width = size.width;
+//     final height = size.height;
+//     double horizontal = position.dx.clamp(0.0, width);
+//     double vertical = position.dy.clamp(0.0, height);
 
-    _handleColorRectChange(horizontal / width, 1 - (vertical / height));
-  }
+//     _handleColorRectChange(horizontal / width, 1 - (vertical / height));
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        _handleGesture(details.localPosition);
-      },
-      onPanUpdate: (details) {
-        _handleGesture(details.localPosition);
-      },
-      child: CustomPaint(
-        size: size,
-        painter: ColorAreaPainter(hsvColor),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTapDown: (details) {
+//         _handleGesture(details.localPosition);
+//       },
+//       onPanUpdate: (details) {
+//         _handleGesture(details.localPosition);
+//       },
+//       child: CustomPaint(
+//         size: size,
+//         painter: ColorAreaPainter(hsvColor),
+//       ),
+//     );
+//   }
+// }
 
 // Painter for SV mixture.
 class ColorAreaPainter extends CustomPainter {
