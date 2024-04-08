@@ -1,6 +1,5 @@
 // import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:craftor_color_picker/color_picker.dart';
-import 'package:craftor_color_picker/src/color_wheel_picker.dart';
 // import 'package:craftor_color_picker/src/palette.dart';
 // import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -48,10 +47,9 @@ class _MyAppState extends State<MyApp> {
               children: [
                 SizedBox(
                   width: double.infinity,
-                  height: 360,
-                  child: ColorWheelPicker(
+                  height: 260,
+                  child: ColorPicker(
                     color: color,
-                    // shouldUpdate: true,
                     onChanged: (c) {
                       setState(() {
                         color = c;
@@ -63,8 +61,8 @@ class _MyAppState extends State<MyApp> {
                   height: 20,
                 ),
                 SelectableText('$color'),
-                SelectableText('${colorToHex(color)}'),
-                SelectableText('${colorToHex(color, alphaFirst: true)}'),
+                SelectableText(colorToHex(color)),
+                SelectableText(colorToHex(color, alphaFirst: true)),
                 TextField(onChanged: (c) {
                   setState(() {
                     color = colorFromHex(c) ?? Colors.black;
